@@ -22,8 +22,7 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = super(Extension, self).get_config_schema()
-        schema['username'] = config.String()
-        schema['password'] = config.Secret()
+        schema['token'] = config.Secret()
         schema['webhook'] = config.String()
         return schema
 
