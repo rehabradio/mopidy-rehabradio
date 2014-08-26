@@ -31,7 +31,16 @@ class StatusReporter(pykka.ThreadingActor):
 
     def on_stop(self):
         logger.info('{0} actor stopped.'.format(self.__class__.__name__))
-        pass
+        token = self.config['webhook']['token']
+        webhook = Webhooks(token)
+        webhook_url = self.config['webhook']['webhook'] + 'queues/' + \
+            str(self.player_data['queue']) + '/head/status/'
+        kwargs = {
+            'current_track': self.core.playback.current_track.get(),
+            'state': "stopped",
+            'time_position': self.core.playback.time_position.get(),
+        }
+        webhook.post(self.__class__.__name__, webhook_url, **kwargs)
 
     def report_status(self):
         token = self.config['webhook']['token']
@@ -39,9 +48,7 @@ class StatusReporter(pykka.ThreadingActor):
         webhook_url = self.config['webhook']['webhook'] + 'queues/' + \
             str(self.player_data['queue']) + '/head/status/'
         kwargs = {
-            'current_track': self.core.playback.current_track.get(),
             'state': self.core.playback.state.get(),
-            'time_position': self.core.playback.time_position.get(),
         }
         webhook.post(self.__class__.__name__, webhook_url, **kwargs)
         time.sleep(2)

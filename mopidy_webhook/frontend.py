@@ -58,6 +58,7 @@ class WebhookFrontend(pykka.ThreadingActor, CoreListener):
     def _stop_children(self):
         self.event_reporter.stop()
         self.status_reporter.stop()
+        self.track_reporter.stop()
 
     def on_stop(self):
         self._stop_children()
