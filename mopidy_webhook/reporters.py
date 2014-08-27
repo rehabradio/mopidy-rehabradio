@@ -79,13 +79,12 @@ class EventReporter(pykka.ThreadingActor, CoreListener):
 
     def on_event(self, event, **kwargs):
         logger.info('{0} actor event: {1}.'.format(
-            self.__class__.__name__), event)
+            self.__class__.__name__, event))
 
-        webhook_url = self.config['webhook']['webhook'] + 'queues/' + \
-            self.player_data['queue'] + '/head/events/' + event + '/'
-        kwargs = {
-            'event': event,
-            'args': kwargs
-        }
+        webhook_url = '{0}queues/{1}/head/events/{2}/'.format(
+            self.config['webhook']['webhook'],
+            self.player_data['queue'],
+            event
+        )
 
         self.webhook.post(self.__class__.__name__, webhook_url, **kwargs)
