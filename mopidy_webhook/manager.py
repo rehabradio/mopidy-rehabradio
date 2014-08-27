@@ -56,41 +56,32 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
             self.webhook_url,
             self.player_data['token']
         )
+        # Set the start position of the track
+        self.time_position = track['time_position']
         # Add track to playlist
-        self.core.tracklist.consume = True
         self.core.tracklist.add(uri=track['uri'])
         self.core.playback.next()
-        # Start track
-        logger.info(self.core.playback.current_track.get())
-        self.time_position = track['time_position']
+        # Play track
         self.core.playback.play()
+        logger.info('Now playling {0}'.format(
+            self.core.playback.current_track.get()))
 
     def on_start(self):
         logger.info('{0} actor started.'.format(self.__class__.__name__))
-
-        if self.core.playback.current_track.get() is None:
-            self.start_track()
+        # Play a track once, then remove from queue
+        self.core.tracklist.consume = True
+        self.start_track()
 
     def on_stop(self):
         logger.info('{0} actor stopped.'.format(self.__class__.__name__))
+        # Empty queue
+        self.core.tracklist.clear()
 
     def on_event(self, event, **kwargs):
-        logger.info('{0} actor event: ' + event + '.'.format(
-            self.__class__.__name__
-        ))
-        if event == 'playlists_loaded':
-            pass
-        if event == 'tracklist_changed':
-            pass
-        if event == 'track_playback_started':
-            if self.time_position:
-                self.core.playback.seek(self.time_position)
-        if event == 'seeked':
-            pass
-        if event == 'track_playback_paused':
-            pass
-        if event == 'track_playback_resumed':
-            pass
+        if event == 'track_playback_started' and self.time_position:
+            # Resumse the track, from last recorded time postion on the server
+            logger.info('{0} actor seeked.'.format(self.__class__.__name__))
+            self.core.playback.seek(self.time_position)
         if event == 'track_playback_ended':
             # Remove track from head of queue
             self._pop_head(
