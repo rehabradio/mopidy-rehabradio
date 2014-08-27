@@ -42,7 +42,7 @@ class StatusReporter(pykka.ThreadingActor):
             'time_position': self.core.playback.time_position.get(),
         }
 
-        self.webhook.post(self.__class__.__name__, webhook_url, **kwargs)
+        self.webhook.patch(self.__class__.__name__, webhook_url, **kwargs)
 
     def report_status(self):
         webhook_url = self.config['webhook']['webhook'] + 'queues/' + \
@@ -53,7 +53,7 @@ class StatusReporter(pykka.ThreadingActor):
             'time_position': self.core.playback.time_position.get(),
         }
 
-        self.webhook.post(self.__class__.__name__, webhook_url, **kwargs)
+        self.webhook.patch(self.__class__.__name__, webhook_url, **kwargs)
 
         # Loop back on itself every 2 seconds
         time.sleep(2)
@@ -87,4 +87,4 @@ class EventReporter(pykka.ThreadingActor, CoreListener):
             event
         )
 
-        self.webhook.post(self.__class__.__name__, webhook_url, **kwargs)
+        self.webhook.patch(self.__class__.__name__, webhook_url, **kwargs)
