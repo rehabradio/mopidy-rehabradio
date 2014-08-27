@@ -24,12 +24,13 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
         self.config = config
         self.player_data = player_data
         self.time_position = None
+        self.webhook = Webhooks(config['webhook']['token'])
         self.webhook_url = config['webhook']['webhook'] + 'queues/' + \
             str(player_data['queue']) + '/head/'
 
-    def _fetch_head_track(self, webhook_url, token):
-        webhook = Webhooks(token)
-        queue_track = webhook.get(self.__class__.__name__, webhook_url)
+    def _fetch_head_track(self, webhook_url):
+        logger.info('Fetching head track')
+        queue_track = self.webhook.get(self.__class__.__name__, webhook_url)
 
         track = queue_track['track']
 
@@ -38,24 +39,17 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
         elif (track['source_type'] == 'soundcloud'):
             queue_track['uri'] = 'soundcloud:song/' + track['name'] + \
                 '.' + track['source_id']
-        elif (track['source_type'] == 'youtube'):
-            queue_track['uri'] = 'youtube:video/' + track['name'] + \
-                '.' + track['source_id']
         else:
             return None
         return queue_track
 
-    def _pop_head(self, webhook_url, token):
-        webhook = Webhooks(token)
-        response = webhook.delete(self.__class__.__name__, webhook_url)
-        return response
+    def _pop_head(self, webhook_url):
+        logger.info('Removing head track')
+        self.webhook.delete(self.__class__.__name__, webhook_url)
 
     def start_track(self):
         # Grab the track at the top of the queue
-        track = self._fetch_head_track(
-            self.webhook_url,
-            self.player_data['token']
-        )
+        track = self._fetch_head_track(self.webhook_url)
         # Set the start position of the track
         self.time_position = track['time_position']
         # Add track to playlist
@@ -84,8 +78,7 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
             self.core.playback.seek(self.time_position)
         if event == 'track_playback_ended':
             # Remove track from head of queue
-            self._pop_head(
-                self.webhook_url + 'pop/', self.player_data['token'])
+            self._pop_head(self.webhook_url + 'pop/')
             time.sleep(0.2)
             # Start new head track
             self.start_track()
