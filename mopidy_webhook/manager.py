@@ -17,7 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 class QueueManager(pykka.ThreadingActor, CoreListener):
-
+    """Manages the tracklist and playback for the mopidy server,
+    based on the current head track.
+    """
     def __init__(self, config, core, player_data):
         super(QueueManager, self).__init__()
         self.core = core
@@ -47,7 +49,7 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
         logger.info('Removing head track')
         self.webhook.delete(self.__class__.__name__, webhook_url)
 
-    def start_track(self):
+    def _start_track(self):
         # Grab the track at the top of the queue
         track = self._fetch_head_track(self.webhook_url)
         # Set the start position of the track
@@ -64,7 +66,7 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
         logger.info('{0} actor started.'.format(self.__class__.__name__))
         # Play a track once, then remove from queue
         self.core.tracklist.consume = True
-        self.start_track()
+        self._start_track()
 
     def on_stop(self):
         logger.info('{0} actor stopped.'.format(self.__class__.__name__))
@@ -81,4 +83,4 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
             self._pop_head(self.webhook_url + 'pop/')
             time.sleep(0.2)
             # Start new head track
-            self.start_track()
+            self._start_track()
