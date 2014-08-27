@@ -20,6 +20,5 @@ class ExtensionTest(unittest.TestCase):
 
         schema = ext.get_config_schema()
 
-        self.assertIn('username', schema)
-        self.assertIn('password', schema)
+        self.assertIn('token', schema)
         self.assertIn('webhook', schema)
