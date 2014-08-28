@@ -28,7 +28,7 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
         self.time_position = None
         self.webhook = Webhooks(config['webhook']['token'])
         self.webhook_url = config['webhook']['webhook'] + 'queues/' + \
-            str(player_data['queue']) + '/head/'
+            str(player_data['queue']['id']) + '/head/'
 
     def _fetch_head_track(self, webhook_url):
         logger.info('Fetching head track')
