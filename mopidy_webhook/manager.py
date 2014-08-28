@@ -58,9 +58,11 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
         self.core.tracklist.add(uri=track['uri'])
         self.core.playback.next()
         # Play track
-        self.core.playback.play()
         logger.info('Now playling {0}'.format(
             self.core.playback.current_track.get()))
+        self.core.playback.play()
+        if self.time_position:
+            self.core.playback.pause()
 
     def on_start(self):
         logger.info('{0} actor started.'.format(self.__class__.__name__))
