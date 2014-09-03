@@ -32,18 +32,7 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
 
     def _fetch_head_track(self, webhook_url):
         logger.info('Fetching head track')
-        queue_track = self.webhook.get(self.__class__.__name__, webhook_url)
-
-        track = queue_track['track']
-
-        if (track['source_type'] == 'spotify'):
-            queue_track['uri'] = 'spotify:track:' + track['source_id']
-        elif (track['source_type'] == 'soundcloud'):
-            queue_track['uri'] = 'soundcloud:song/' + track['name'] + \
-                '.' + track['source_id']
-        else:
-            return None
-        return queue_track
+        return self.webhook.get(self.__class__.__name__, webhook_url)
 
     def _pop_head(self, webhook_url):
         logger.info('Removing head track')
@@ -55,7 +44,7 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
         # Set the start position of the track
         self.time_position = track['time_position']
         # Add track to playlist
-        self.core.tracklist.add(uri=track['uri'])
+        self.core.tracklist.add(uri=track['track']['uri'])
         self.core.playback.next()
         # Play track
         logger.info('Now playling {0}'.format(
