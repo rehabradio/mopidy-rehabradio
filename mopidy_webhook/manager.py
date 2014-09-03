@@ -61,8 +61,11 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
         logger.info('Now playling {0}'.format(
             self.core.playback.current_track.get()))
         self.core.playback.play()
+        # Pause the track, if it is to be seeked
         if self.time_position:
             self.core.playback.pause()
+            time.sleep(0.2)
+            self.core.playback.seek(self.time_position)
 
     def on_start(self):
         logger.info('{0} actor started.'.format(self.__class__.__name__))
@@ -76,10 +79,6 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
         self.core.tracklist.clear()
 
     def on_event(self, event, **kwargs):
-        if event == 'track_playback_started' and self.time_position:
-            # Resumse the track, from last recorded time postion on the server
-            logger.info('{0} actor seeked.'.format(self.__class__.__name__))
-            self.core.playback.seek(self.time_position)
         if event == 'track_playback_ended':
             # Remove track from head of queue
             self._pop_head(self.webhook_url + 'pop/')
