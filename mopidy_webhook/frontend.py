@@ -36,28 +36,19 @@ class WebhookFrontend(pykka.ThreadingActor, CoreListener):
         self.player_data = _fetch_player_data(self.__class__.__name__, config)
 
     def on_start(self):
-        #Updates the queued track based on events triggered by mopidy
+        # Updates the queued track based on events triggered by mopidy
         self.event_reporter = EventReporter.start(
-            self.config,
-            self.core,
-            self.player_data
-        )
-        #Updates the queued track based on status updates triggered by mopidy
-        #self.status_reporter = StatusReporter.start(
-        #    self.config,
-        #    self.core,
-        #    self.player_data
-        #)
+            self.config, self.core, self.player_data)
+        # Updates the queued track based on status updates triggered by mopidy
+        self.status_reporter = StatusReporter.start(
+            self.config, self.core, self.player_data)
         # Tracklist and playback management
         self.track_reporter = QueueManager.start(
-            self.config,
-            self.core,
-            self.player_data
-        )
+            self.config, self.core, self.player_data)
 
     def _stop_children(self):
         self.event_reporter.stop()
-        #self.status_reporter.stop()
+        self.status_reporter.stop()
         self.track_reporter.stop()
 
     def on_stop(self):
