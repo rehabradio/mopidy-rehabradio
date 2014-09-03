@@ -45,16 +45,14 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
         self.time_position = track['time_position']
         # Add track to playlist
         self.core.tracklist.add(uri=track['track']['uri'])
-        self.core.playback.next()
-        # Play track
-        logger.info('Now playling {0}'.format(
-            self.core.playback.current_track.get()))
+        # Add the track to "now playing"
         self.core.playback.play()
-        # Pause the track, if it is to be seeked
-        if self.time_position:
-            self.core.playback.pause()
-            time.sleep(0.2)
-            self.core.playback.seek(self.time_position)
+        self.core.playback.pause()
+        # Allow server to become stable
+        time.sleep(2)
+        # Play track at latest database time position
+        track = self._fetch_head_track(self.webhook_url)
+        self.core.playback.seek(track['time_position'])
 
     def on_start(self):
         logger.info('{0} actor started.'.format(self.__class__.__name__))
