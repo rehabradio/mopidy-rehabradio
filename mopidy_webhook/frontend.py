@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 # stdlib imports
 import logging
-import time
 
 # third-party imports
 import pykka
