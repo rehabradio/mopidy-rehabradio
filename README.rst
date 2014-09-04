@@ -38,8 +38,7 @@ Before starting Mopidy, you must add configuration for
 Mopidy-Webhook to your Mopidy configuration file::
 
     [webhook]
-    username = your_username
-    password = your_password
+    token = device token
     webhook = http://localhost:8080/webhook/
 
 ``username`` and ``password`` if present, will be encoded and sent as HTTP Basic Auth headers. ``webhook`` should be a URL (accessible to the mopidy client).
