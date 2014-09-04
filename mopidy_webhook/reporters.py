@@ -22,11 +22,12 @@ class StatusReporter(pykka.ThreadingActor):
 
     def __init__(self, config, core, player_data):
         super(StatusReporter, self).__init__()
-        self.config = config
         self.core = core
+        self.config = config
         self.player_data = player_data
         self.in_future = self.actor_ref.proxy()
         self.webhook = Webhooks(config['webhook']['token'])
+        self.start_reporting = False
 
     def on_start(self):
         logger.info('{0} actor started.'.format(self.__class__.__name__))
@@ -46,20 +47,15 @@ class StatusReporter(pykka.ThreadingActor):
         self.webhook.patch(self.__class__.__name__, webhook_url, **kwargs)
 
     def report_status(self):
-        # Ensure there is a track to report on
-        if self.core.playback.current_track.get():
+        webhook_url = self.config['webhook']['webhook'] + 'queues/' + \
+            str(self.player_data['queue']['id']) + '/head/status/'
+        kwargs = {
+            'current_track': self.core.playback.current_track.get(),
+            'state': self.core.playback.state.get(),
+            'time_position': self.core.playback.time_position.get(),
+        }
 
-            webhook_url = self.config['webhook']['webhook'] + 'queues/' + \
-                str(self.player_data['queue']['id']) + '/head/status/'
-            kwargs = {
-                'current_track': self.core.playback.current_track.get(),
-                'state': self.core.playback.state.get(),
-                'time_position': self.core.playback.time_position.get(),
-            }
-
-            self.webhook.patch(self.__class__.__name__, webhook_url, **kwargs)
-
-        logger.info(self.core.playback.state.get())
+        self.webhook.patch(self.__class__.__name__, webhook_url, **kwargs)
 
         # Loop back on itself every 2 seconds
         time.sleep(2)

@@ -23,7 +23,7 @@ class WebhookFrontend(pykka.ThreadingActor, CoreListener):
         super(WebhookFrontend, self).__init__()
         self.config = config
         self.core = core
-        self.player_data = self._fetch_player_data()
+        self.start_reporters = False
 
     def _fetch_player_data(self):
         token = self.config['webhook']['token']
@@ -33,17 +33,21 @@ class WebhookFrontend(pykka.ThreadingActor, CoreListener):
         return webhook.get(self.__class__.__name__, webhook_url)
 
     def on_start(self):
+        self.player_data = self._fetch_player_data()
         # Tracklist and playback management
         self.queue_manager = QueueManager.start(
             self.config, self.core, self.player_data)
-        # Wait until track is loaded and seeked
-        time.sleep(3)
-        # Updates the queued track based on events triggered by mopidy
-        self.event_reporter = EventReporter.start(
-            self.config, self.core, self.player_data)
-        # Updates the queued track based on status updates triggered by mopidy
-        self.status_reporter = StatusReporter.start(
-            self.config, self.core, self.player_data)
+
+    def on_event(self, event, **kwargs):
+        # Wait until track is loaded and seeked to start reporters
+        if event == 'seeked' and self.start_reporters is False:
+            self.start_reporters = True
+            # Updates the queued track based on status updates
+            self.status_reporter = StatusReporter.start(
+                self.config, self.core, self.player_data)
+            # Updates the queued track based on events triggered by mopidy
+            self.event_reporter = EventReporter.start(
+                self.config, self.core, self.player_data)
 
     def _stop_children(self):
         self.event_reporter.stop()
