@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 # stdlib imports
 import logging
 import time
-import Queue
 
 # third-party imports
 import pykka
@@ -32,23 +31,35 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
         logger.info('Fetching head track')
         return self.webhook.get(self.__class__.__name__, webhook_url)
 
-    def _pop_head(self, webhook_url):
-        logger.info('Removing head track')
-        self.webhook.delete(self.__class__.__name__, webhook_url)
-
     def _start_track(self):
+        logger.info('Playing Track')
+        self.core.tracklist.clear()
         track = self._fetch_head_track(self.webhook_url)
-        q = Queue.Queue()
         # Add track to queue
-        q.put(lambda: self.core.tracklist.add(uri=track['track']['uri']))
+        self.core.tracklist.add(uri=track['track']['uri'])
         # Set track to active
-        q.put(lambda: self.core.playback.play())
-        q.put(lambda: self.core.playback.pause())
-        q.put(lambda: self.core.playback.seek(track['time_position']))
+        self.core.playback.play()
+
+        if track['time_position']:
+            self.core.playback.pause()
+            self._seek_track(track)
+
+    def _next_track(self):
+        logger.info('Removing head track')
+        self.webhook.delete(self.__class__.__name__, self.webhook_url + 'pop/')
+        time.sleep(1)
+        self._start_track()
+
+    def _seek_track(self, track):
+        seek_time = track['time_position'] + 2000
+        if seek_time >= track['track']['duration_ms']:
+            self._next_track()
+        else:
+            time.sleep(2)
+            self.core.playback.seek(track['time_position'])
 
     def on_start(self):
         logger.info('{0} actor started.'.format(self.__class__.__name__))
-        self.core.tracklist.clear()
         # Play a track once, then remove from queue
         self.core.tracklist.consume = True
         self._start_track()
@@ -60,12 +71,5 @@ class QueueManager(pykka.ThreadingActor, CoreListener):
 
     def on_event(self, event, **kwargs):
         if event == 'track_playback_ended':
-            q = Queue.Queue()
-            # Remove track from head of queue
-            q.put(lambda: self._pop_head(self.webhook_url + 'pop/'))
             # Start new head track
-            q.put(lambda: self._start_track())
-            while not q.empty():
-                func = q.get()
-                time.sleep(0.1)
-                func()
+            self._next_track()

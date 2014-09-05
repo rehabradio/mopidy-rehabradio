@@ -39,7 +39,7 @@ class WebhookFrontend(pykka.ThreadingActor, CoreListener):
 
     def on_event(self, event, **kwargs):
         # Wait until track is loaded and seeked to start reporters
-        if event == 'seeked' and self.start_reporters is False:
+        if event == 'track_playback_started' and self.start_reporters is False:
             self.start_reporters = True
             # Updates the queued track based on status updates
             self.status_reporter = StatusReporter.start(

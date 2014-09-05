@@ -9,9 +9,6 @@ import logging
 import requests
 from mopidy.models import ModelJSONEncoder
 
-# local imports
-from utils.exceptions import BadRequest
-
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +26,8 @@ class Webhooks(object):
         logger.info('{0} Webhook URL: {1}'.format(class_name, webhook_url))
 
         payload = {}
+        response_data = {}
+
         if data:
             payload = json.dumps(data, cls=ModelJSONEncoder, indent=2)
             logger.info('{0} Webhook Payload: {1}'.format(class_name, payload))
@@ -42,14 +41,9 @@ class Webhooks(object):
                 e.__class__.__name__,
                 e.message,
             ))
-            raise BadRequest('Unable to send {0} Webhook: ({1}) {2}'.format(
-                class_name,
-                e.__class__.__name__,
-                e.message,
-            ))
         else:
             if response.status_code != 200:
-                raise BadRequest('{0} Bad status code returned: ({1}) {2}'.format(
+                logger.warning('{0} Bad status code returned: ({1}) {2}'.format(
                     class_name,
                     response.status_code,
                     webhook_url
@@ -58,7 +52,7 @@ class Webhooks(object):
             try:
                 response_data = response.json()
             except Exception as e:
-                raise BadRequest('{0} Invalid response returned: ({1}) {2}'.format(
+                logger.warning('{0} Invalid response returned: ({1}) {2}'.format(
                     class_name,
                     e.__class__.__name__,
                     e.message,

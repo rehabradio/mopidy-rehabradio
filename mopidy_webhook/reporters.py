@@ -81,13 +81,17 @@ class EventReporter(pykka.ThreadingActor, CoreListener):
         logger.info('{0} actor stopped.'.format(self.__class__.__name__))
 
     def on_event(self, event, **kwargs):
-        logger.info('{0} actor event: {1}.'.format(
-            self.__class__.__name__, event))
+        if (event == 'track_playback_started'
+                or event == 'track_playback_paused'
+                or event == 'track_playback_resumed'
+                or event == 'seeked'):
+            logger.info('{0} actor event: {1}.'.format(
+                self.__class__.__name__, event))
 
-        webhook_url = '{0}queues/{1}/head/events/{2}/'.format(
-            self.config['webhook']['webhook'],
-            self.player_data['queue']['id'],
-            event
-        )
+            webhook_url = '{0}queues/{1}/head/events/{2}/'.format(
+                self.config['webhook']['webhook'],
+                self.player_data['queue']['id'],
+                event
+            )
 
-        self.webhook.patch(self.__class__.__name__, webhook_url, **kwargs)
+            self.webhook.patch(self.__class__.__name__, webhook_url, **kwargs)
