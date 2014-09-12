@@ -36,7 +36,8 @@ class StatusReporter(pykka.ThreadingActor):
             'state': self.core.playback.state.get(),
             'time_position': self.core.playback.time_position.get(),
         }
-        #self.session.report_status(**kwargs)
+        self.session.report_status(**kwargs)
+
         time.sleep(2)
         self.in_future.report_status()
 
@@ -56,5 +57,4 @@ class EventReporter(pykka.ThreadingActor, CoreListener):
         logger.info('{0} actor stopped.'.format(self.__class__.__name__))
 
     def on_event(self, event, **kwargs):
-        #self.session.report_event(**kwargs)
-        pass
+        self.session.report_event(**kwargs)
