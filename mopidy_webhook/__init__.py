@@ -1,10 +1,15 @@
+# future imports
 from __future__ import unicode_literals
 
+# stdlib imports
 import logging
 import os
 
+# third-party imports
 from mopidy import config, ext
 
+# local imports
+from .frontend import WebhookFrontend
 
 __version__ = '0.1.0'
 logger = logging.getLogger(__name__)
@@ -27,5 +32,4 @@ class Extension(ext.Extension):
         return schema
 
     def setup(self, registry):
-        from .frontend import WebhookFrontend
         registry.add('frontend', WebhookFrontend)

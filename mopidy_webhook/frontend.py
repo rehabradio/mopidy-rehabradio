@@ -9,9 +9,9 @@ import pykka
 from mopidy.core import CoreListener
 
 # local imports
-from webhooks import Webhooks
+from playback import WebhookPlayback
 from reporters import EventReporter, StatusReporter
-from manager import QueueManager
+from session import WebhookSession
 
 
 logger = logging.getLogger(__name__)
@@ -23,37 +23,32 @@ class WebhookFrontend(pykka.ThreadingActor, CoreListener):
         self.config = config
         self.core = core
         self.start_reporters = False
-
-    def _fetch_player_data(self):
-        token = self.config['webhook']['token']
-        webhook = Webhooks(token)
-        webhook_url = self.config['webhook']['webhook'] + 'players/' + token + '/'
-
-        return webhook.get(self.__class__.__name__, webhook_url)
+        self.event_reporter = None
+        self.playback = None
+        self.session = WebhookSession(config)
+        self.status_reporter = None
 
     def on_start(self):
-        self.player_data = self._fetch_player_data()
-        # Tracklist and playback management
-        self.queue_manager = QueueManager.start(
-            self.config, self.core, self.player_data)
+        self.session.start()
+
+        self.playback = WebhookPlayback.start(
+            self.config, self.core, self.session)
+
+        self.event_reporter = EventReporter.start(
+            self.config, self.core, self.session)
+        self.status_reporter = StatusReporter.start(
+            self.config, self.core, self.session)
 
     def on_event(self, event, **kwargs):
-        # Wait until track is loaded and seeked to start reporters
-        if event == 'track_playback_started' and self.start_reporters is False:
-            self.start_reporters = True
-            # Updates the queued track based on status updates
-            self.status_reporter = StatusReporter.start(
-                self.config, self.core, self.player_data)
-            # Updates the queued track based on events triggered by mopidy
-            self.event_reporter = EventReporter.start(
-                self.config, self.core, self.player_data)
+        pass
 
     def _stop_children(self):
         self.event_reporter.stop()
+        self.playback.stop()
         self.status_reporter.stop()
-        self.queue_manager.stop()
 
     def on_stop(self):
+        self.session.stop()
         self._stop_children()
 
     def on_failure(self, exception_type, exception_value, traceback):
