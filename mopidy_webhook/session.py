@@ -37,9 +37,10 @@ class WebhookSession(object):
 
     def start(self):
         logger.info('Webhook session started')
-        webhook_url = '{0}players/{1}/'.format(self.base_url, self.token)
+        webhook_url = '{0}players/'.format(self.base_url)
 
-        self.device = self.webhook.get(self.__class__.__name__, webhook_url)
+        response = self.webhook.get(self.__class__.__name__, webhook_url)
+        self.device = response['results'][0]
 
     def stop(self):
         logger.info('Session ended.')
