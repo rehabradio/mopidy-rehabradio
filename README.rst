@@ -2,20 +2,12 @@
 Mopidy-Webhook
 ****************************
 
-.. image:: https://img.shields.io/pypi/v/Mopidy-Webhook.svg?style=flat
-    :target: https://pypi.python.org/pypi/Mopidy-Webhook/
-    :alt: Latest PyPI version
-
-.. image:: https://img.shields.io/pypi/dm/Mopidy-Webhook.svg?style=flat
-    :target: https://pypi.python.org/pypi/Mopidy-Webhook/
-    :alt: Number of PyPI downloads
-
-.. image:: https://img.shields.io/travis/paddycarey/mopidy-webhook/master.png?style=flat
-    :target: https://travis-ci.org/paddycarey/mopidy-webhook
+.. image:: https://img.shields.io/travis/rehabradio/mopidy-webhook/master.png?style=flat
+    :target: https://travis-ci.org/rehabradio/mopidy-webhook
     :alt: Travis CI build status
 
-.. image:: https://img.shields.io/coveralls/paddycarey/mopidy-webhook/master.svg?style=flat
-   :target: https://coveralls.io/r/paddycarey/mopidy-webhook?branch=master
+.. image:: https://img.shields.io/coveralls/rehabradio/mopidy-webhook/master.svg?style=flat
+   :target: https://coveralls.io/r/rehabradio/mopidy-webhook?branch=master
    :alt: Test coverage
 
 Mopidy webhook extension
@@ -55,9 +47,9 @@ If you are wanting to create a startup deamon to automate starting the mopidy se
 Project resources
 =================
 
-- `Source code <https://github.com/paddycarey/mopidy-webhook>`_
-- `Issue tracker <https://github.com/paddycarey/mopidy-webhook/issues>`_
-- `Download development snapshot <https://github.com/paddycarey/mopidy-webhook/archive/master.tar.gz#egg=Mopidy-Webhook-dev>`_
+- `Source code <https://github.com/rehabradio/mopidy-webhook>`_
+- `Issue tracker <https://github.com/rehabradio/mopidy-webhook/issues>`_
+- `Download development snapshot <https://github.com/rehabradio/mopidy-webhook/archive/master.tar.gz#egg=Mopidy-Webhook-dev>`_
 
 
 Changelog
