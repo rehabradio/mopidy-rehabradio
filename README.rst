@@ -23,9 +23,11 @@ The set up process has been automated for you, simply pull down this repo and ru
 
 This will install mopidy, along with the spotify, soundcloud and youtube modules.
 A config file will be place at `~/.config/mopidy/mopidy.conf`, which you will be required to manually update.
-So go into the `mopidy.conf` file and replace the values below
+So go into the `mopidy.conf` file and replace the values below_::
 
     $ vi ~/.config/mopidy/mopidy.conf
+
+                ~~~~~~~~~
 
     [spotify]
     # https://www.spotify.com/uk/account/set-device-password/
@@ -39,6 +41,8 @@ So go into the `mopidy.conf` file and replace the values below
     [webhook]
     # http://server-core.herokuapp.com/admin/radio_players/player/
     token = [player token provided from the server-core]
+
+                ~~~~~~~~~
 
 If you are wanting to create a startup deamon to automate starting the mopidy server, each time your device boots then you can run_::
 
