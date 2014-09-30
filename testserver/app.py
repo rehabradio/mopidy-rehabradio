@@ -1,5 +1,8 @@
+# std-lib imports
 import json
 import logging
+
+# thrid-party imports
 import webapp2
 
 

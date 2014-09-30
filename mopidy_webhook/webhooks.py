@@ -43,20 +43,24 @@ class Webhooks(object):
             ))
         else:
             if response.status_code != 200:
-                logger.warning('{0} Bad status code returned: ({1}) {2}'.format(
-                    class_name,
-                    response.status_code,
-                    webhook_url
-                ))
+                logger.warning(
+                    '{0} Bad status code returned: ({1}) {2}'.format(
+                        class_name,
+                        response.status_code,
+                        webhook_url
+                    )
+                )
 
             try:
                 response_data = response.json()
             except Exception as e:
-                logger.warning('{0} Invalid response returned: ({1}) {2}'.format(
-                    class_name,
-                    e.__class__.__name__,
-                    e.message,
-                ))
+                logger.warning(
+                    '{0} Invalid response returned: ({1}) {2}'.format(
+                        class_name,
+                        e.__class__.__name__,
+                        e.message,
+                    )
+                )
 
             logger.info('{0} Webhook Response Status: {1}'.format(
                 class_name, response.status_code

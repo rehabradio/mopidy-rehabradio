@@ -1,7 +1,11 @@
+# Future imports
 from __future__ import unicode_literals
 
+# Stdlib imports
 import re
-from setuptools import setup, find_packages
+
+# Third-party imports
+from setuptools import find_packages, setup
 
 
 def get_version(filename):
