@@ -7,7 +7,7 @@ Mopidy-Webhook
    :alt: Latest Travis CI build status
 
 .. image:: https://coveralls.io/repos/rehabradio/mopidy-webhook/badge.png
-  :target: https://coveralls.io/r/rehabradio/mopidy-webhook
+  :target: https://coveralls.io/r/rehabradio/mopidy-webhook?branch=develop
   :alt: Test coverage
 
 
