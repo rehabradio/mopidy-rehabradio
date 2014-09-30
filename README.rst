@@ -2,12 +2,12 @@
 Mopidy-Webhook
 ****************************
 
-.. image:: https://img.shields.io/travis/rehabradio/mopidy-webhook/master.png?style=flat
-    :target: https://travis-ci.org/rehabradio/mopidy-webhook
-    :alt: Travis CI build status
+.. image:: https://travis-ci.org/rehabradio/mopidy-webhook.png
+   :target: https://travis-ci.org/rehabradio/mopidy-webhook
+   :alt: Latest Travis CI build status
 
-.. image:: https://img.shields.io/coveralls/rehabradio/mopidy-webhook/master.svg?style=flat
-   :target: https://coveralls.io/r/rehabradio/mopidy-webhook?branch=master
+.. image:: https://img.shields.io/coveralls/rehabradio/mopidy-webhook/develop.svg?style=flat
+   :target: https://coveralls.io/r/rehabradio/mopidy-webhook?branch=develop
    :alt: Test coverage
 
 Mopidy webhook extension
