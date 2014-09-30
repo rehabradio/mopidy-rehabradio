@@ -60,11 +60,11 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
                     'time_position': self.core.playback.time_position.get(),
                 }
                 self.session.update_head(kwargs)
-
-            self.timer = threading.Timer(1, self.update_status)
-            self.timer.start()
         except:
             pass
+
+        self.timer = threading.Timer(1, self.update_status)
+        self.timer.start()
 
     def _next_head_track(self):
         # Start new head track
