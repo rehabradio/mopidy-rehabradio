@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class Extension(ext.Extension):
 
-    dist_name = 'Mopidy-Webhook'
+    dist_name = 'Mopidy-rehabradio'
     ext_name = 'webhook'
     version = __version__
 

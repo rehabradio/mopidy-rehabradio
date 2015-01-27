@@ -1,17 +1,17 @@
 ****************************
-Mopidy-Webhook
+Mopidy-rehabradio
 ****************************
 
-.. image:: https://travis-ci.org/rehabradio/mopidy-webhook.png
-   :target: https://travis-ci.org/rehabradio/mopidy-webhook
+.. image:: https://travis-ci.org/rehabradio/mopidy-rehabradio.png
+   :target: https://travis-ci.org/rehabradio/mopidy-rehabradio
    :alt: Latest Travis CI build status
 
-.. image:: https://coveralls.io/repos/rehabradio/mopidy-webhook/badge.png
-  :target: https://coveralls.io/r/rehabradio/mopidy-webhook?branch=develop
+.. image:: https://coveralls.io/repos/rehabradio/mopidy-rehabradio/badge.png
+  :target: https://coveralls.io/r/rehabradio/mopidy-rehabradio?branch=develop
   :alt: Test coverage
 
 
-Mopidy webhook extension
+Mopidy rehabradio extension
 
 This is very much a work in progress. Please treat it as such and file issues where appropriate.
 
@@ -52,9 +52,9 @@ If you are wanting to create a startup deamon to automate starting the mopidy se
 Project resources
 =================
 
-- `Source code <https://github.com/rehabradio/mopidy-webhook>`_
-- `Issue tracker <https://github.com/rehabradio/mopidy-webhook/issues>`_
-- `Download development snapshot <https://github.com/rehabradio/mopidy-webhook/archive/master.tar.gz#egg=Mopidy-Webhook-dev>`_
+- `Source code <https://github.com/rehabradio/mopidy-rehabradio>`_
+- `Issue tracker <https://github.com/rehabradio/mopidy-rehabradio/issues>`_
+- `Download development snapshot <https://github.com/rehabradio/mopidy-rehabradio/archive/master.tar.gz#egg=Mopidy-rehabradio-dev>`_
 
 
 Changelog

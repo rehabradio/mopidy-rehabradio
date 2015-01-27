@@ -15,13 +15,13 @@ def get_version(filename):
 
 
 setup(
-    name='Mopidy-Webhook',
-    version=get_version('mopidy_webhook/__init__.py'),
-    url='https://github.com/paddycarey/mopidy-webhook',
+    name='Mopidy-rehabradio',
+    version=get_version('mopidy_rehabradio/__init__.py'),
+    url='https://github.com/rehabradio/mopidy-rehabradio',
     license='Apache License, Version 2.0',
-    author='Patrick Carey',
-    author_email='paddy@wackwack.co.uk',
-    description='Mopidy webhook extension',
+    author='Mark McConnell',
+    author_email='mark@rehabstudio.com',
+    description='Mopidy rehabradio extension',
     long_description=open('README.rst').read(),
     packages=find_packages(exclude=['tests', 'tests.*']),
     zip_safe=False,
@@ -39,7 +39,7 @@ setup(
     ],
     entry_points={
         'mopidy.ext': [
-            'webhook = mopidy_webhook:Extension',
+            'webhook = mopidy_rehabradio:Extension',
         ],
     },
     classifiers=[
