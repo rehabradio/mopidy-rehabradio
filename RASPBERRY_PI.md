@@ -9,12 +9,11 @@ Setup
 
 Open up a terminal from your raspbery pi, and install git:
 
-    $ sudo apt-get install -y git
     $ git clone https://github.com/rehabradio/mopidy-rehabradio.git ~/mopidy-rehabradio && cd ~/mopidy-rehabradio
 
 Most of the set up and installation has been automated for you, through the `Makefile`:
 
-    $ sudo make install
+    $ make install
 
 This will install the Mopidy server and some third-party extensions (spotify/soundcloud/reahradio).
 It will also create a `mopidy.conf` at `~/.config/mopidy`
@@ -63,7 +62,7 @@ Startup Daemon
 
 If you are wanting to create a startup daemon to automate starting the mopidy server, each time your device boots then you can run::
 
-    $ sudo make daemon
+    $ make daemon
 
 
 Project resources

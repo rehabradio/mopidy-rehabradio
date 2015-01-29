@@ -20,7 +20,7 @@ Configuration
 =============
 The set up process has been automated for you, simply pull down this repo and run_::
 
-    $ sudo make build
+    $ make build
 
 This will install mopidy, along with the spotify, soundcloud and youtube modules.
 A config file will be place at `~/.config/mopidy/mopidy.conf`, which you will be required to manually update.
@@ -47,7 +47,7 @@ So go into the `mopidy.conf` file and replace the values below_::
 
 If you are wanting to create a startup deamon to automate starting the mopidy server, each time your device boots then you can run_::
 
-    $ sudo make deamon
+    $ make deamon
 
 Project resources
 =================
