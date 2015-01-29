@@ -17,7 +17,7 @@ install:
 	mkdir -p ~/.config/mopidy/
 	wget -O ~/.config/mopidy/mopidy.conf https://gist.githubusercontent.com/mjmcconnell/9de101676acfdb67d265/raw/1596ac2e732d36f8f1697130352ecd5a4e0df298/mopidy.conf
 
-deamon:
+daemon:
 	cd /etc/init.d/
 	sudo wget -O mopidy https://gist.githubusercontent.com/mjmcconnell/893201da1f6512247cc4/raw/960d296fa19418dd365591fad834aa9d977eb726/mopidy.daemon
 	sudo chmod +x /etc/init.d/mopidy
