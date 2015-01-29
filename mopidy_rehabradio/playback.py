@@ -42,7 +42,8 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         logger.info('{0} actor stopped.'.format(self.__class__.__name__))
         # Empty queue
         self.core.tracklist.clear()
-        self.timer.cancel()
+        if self.timer:
+            self.timer.cancel()
 
     def on_event(self, event, **kwargs):
         if event == 'track_playback_started':
