@@ -1,6 +1,4 @@
-****************************
-Mopidy-rehabradio - Raspberry Pi setup
-****************************
+# Mopidy-rehabradio - Raspberry Pi setup
 
 Simple instructions to get a Raspberry Pi setup with Mopidy music server and the mopidy-rehabradio extension installed
 
@@ -23,12 +21,12 @@ Once the `make install` command has finished, open up the `mopidy.conf` file in 
 
 You can find the values for spotify and soundcloud here:
 
-- `Spotify <https://www.spotify.com/uk/account/set-device-password/>`_
-- `Soundcloud <http://www.mopidy.com/authenticate>`_
+- [Spotify](https://www.spotify.com/uk/account/set-device-password/)
+- [Soundcloud](http://www.mopidy.com/authenticate)
 
 *Note that the spotify username and password values are not your noraml login values
 
-The webhook values are taken from the api server that the webhook will be listening to, such as `rehabradio <https://github.com/rehabradio/server-core>`_
+The webhook values are taken from the api server that the webhook will be listening to, such as [rehabradio](https://github.com/rehabradio/server-core)
 
 The `webhook` value is your api server url (www.your-domail.com/api/)
 The `token` value is then created from your api server admin section. Login into the admin section and under the "players" section create a new user.
@@ -69,4 +67,4 @@ If you are wanting to create a startup daemon to automate starting the mopidy se
 Project resources
 =================
 
-- `Source code <https://github.com/rehabradio/mopidy-rehabradio>`_
+- [Source code](https://github.com/rehabradio/mopidy-rehabradio)
