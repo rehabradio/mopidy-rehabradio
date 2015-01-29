@@ -4,14 +4,19 @@ help:
 	@echo "test - Run test suite"
 
 install:
-	wget -q -O - https://apt.mopidy.com/mopidy.gpg | sudo apt-key add -
-	sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/mopidy.list
-	sudo apt-get update
-	sudo apt-get install -y mopidy
+	apt-get update
+	apt-get install -y python-setuptools python-pip python-dev build-essential
+	pip install --upgrade pip
 
-	apt-cache search mopidy
-	sudo apt-get install -y mopidy-spotify
-	sudo apt-get install -y mopidy-soundcloud
+	wget -q -O - https://apt.mopidy.com/mopidy.gpg | sudo apt-key add -
+	wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/mopidy.list
+
+	apt-get update
+	apt-get install -y mopidy
+
+	pip install Mopidy-Spotify
+	pip install Mopidy-SoundCloud
+
 	python setup.py develop
 
 	mkdir -p ~/.config/mopidy/
@@ -19,7 +24,7 @@ install:
 
 daemon:
 	cd /etc/init.d/
-	sudo wget -O mopidy https://gist.githubusercontent.com/mjmcconnell/893201da1f6512247cc4/raw/960d296fa19418dd365591fad834aa9d977eb726/mopidy.daemon
-	sudo chmod +x /etc/init.d/mopidy
-	sudo service mopidy start
-	sudo update-rc.d mopidy enable
+	wget -O mopidy https://gist.githubusercontent.com/mjmcconnell/893201da1f6512247cc4/raw/960d296fa19418dd365591fad834aa9d977eb726/mopidy.daemon
+	chmod +x /etc/init.d/mopidy
+	service mopidy start
+	update-rc.d mopidy enable
