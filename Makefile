@@ -20,7 +20,7 @@ install:
 	pip install Mopidy-Spotify
 	pip install Mopidy-SoundCloud
 
-	python setup.py develop
+	python setup.py install
 
 	mkdir -p ~/.config/mopidy/
 	wget -O ~/.config/mopidy/mopidy.conf https://gist.githubusercontent.com/mjmcconnell/9de101676acfdb67d265/raw/1596ac2e732d36f8f1697130352ecd5a4e0df298/mopidy.conf
