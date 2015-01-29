@@ -2,6 +2,8 @@
 
 Simple instructions to get a Raspberry Pi setup with Mopidy music server and the mopidy-rehabradio extension installed
 
+This setup is designed for a Raspberry Pi b+ model, with Raspbian os installed
+
 Setup
 =============
 

@@ -14,6 +14,9 @@ install:
 	apt-get update
 	apt-get install -y mopidy
 
+	apt-get install -y mopidy-spotify
+	apt-get install -y mopidy-soundcloud
+
 	pip install Mopidy-Spotify
 	pip install Mopidy-SoundCloud
 
