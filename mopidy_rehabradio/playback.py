@@ -62,12 +62,12 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
 
         time_til_end = self.track['track']['duration_ms'] - self.core.playback.time_position.get()
 
-        # If there is less than 8 seconds left on the track, add the next track
-        if time_til_end < 8000 and self.core.tracklist.length.get() < 2:
-            self.session.pop_head()
-            self.track = self.session.fetch_head()
+        # If there is less than 9 seconds left on the track, add the next track
+        if time_til_end < 9000 and self.core.tracklist.length.get() < 2:
+            self.track = self.session.pop_head()
             self.core.tracklist.add(uri=self.track['track']['uri'])
 
+            # Ensure a track is playing
             if self.core.playback.state.get() != 'playing':
                 self.core.playback.play()
 
@@ -76,8 +76,5 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
 
     def _seek_track(self):
         seek_time = self.track['time_position'] + 1500
-        if seek_time >= self.track['track']['duration_ms']:
-            self._next_head_track()
-        else:
-            time.sleep(1.5)
-            self.core.playback.seek(seek_time)
+        time.sleep(1.5)
+        self.core.playback.seek(seek_time)

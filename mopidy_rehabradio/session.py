@@ -32,7 +32,8 @@ class WebhookSession(object):
         webhook_url = '{0}queues/{1}/head/'.format(
             self.base_url, self.device['queue']['id'])
 
-        self.webhook.delete(self.__class__.__name__, webhook_url)
+        next_track = self.webhook.delete(self.__class__.__name__, webhook_url)
+        return next_track
 
     def start(self):
         logger.info('Webhook session started')
