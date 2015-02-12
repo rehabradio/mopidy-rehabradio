@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 class WebhookSession(object):
 
     def __init__(self, config):
-        logger.info('Webhook session started')
         self.device = None
         self.token = config['webhook']['token']
         self.webhook = Webhooks(self.token)

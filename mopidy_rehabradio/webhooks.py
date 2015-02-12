@@ -22,19 +22,13 @@ class Webhooks(object):
         }
 
     def _send_request(self, webhook, class_name, webhook_url, data=None):
-
-        logger.info('{0} Webhook URL: {1}'.format(class_name, webhook_url))
-
         payload = {}
         response_data = {}
 
         if data:
             payload = json.dumps(data, cls=ModelJSONEncoder, indent=2)
-            logger.info('{0} Webhook Payload: {1}'.format(class_name, payload))
-
         try:
-            response = webhook(
-                webhook_url, headers=self.headers, data=json.dumps(payload))
+            response = webhook(webhook_url, headers=self.headers, data=json.dumps(payload))
         except Exception as e:
             logger.warning('Unable to send {0} Webhook: ({1}) {2}'.format(
                 class_name,
@@ -61,13 +55,6 @@ class Webhooks(object):
                         e.message,
                     )
                 )
-
-            logger.info('{0} Webhook Response Status: {1}'.format(
-                class_name, response.status_code
-            ))
-            logger.info('{0} Webhook Response Body: {1}'.format(
-                class_name, response_data
-            ))
 
         return response_data
 
