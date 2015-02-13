@@ -21,18 +21,16 @@ class WebhookSession(object):
 
     def fetch_head(self):
         logger.info('Fetching head track')
-        webhook_url = '{0}queues/{1}/head/'.format(
-            self.base_url, self.device['queue']['id'])
+        webhook_url = '{0}queues/head/'.format(self.base_url)
 
         track = self.webhook.get(self.__class__.__name__, webhook_url)
         return track
 
-    def pop_head(self):
+    def pop_head(self, kwargs):
         logger.info('Removing current head track')
-        webhook_url = '{0}queues/{1}/head/'.format(
-            self.base_url, self.device['queue']['id'])
+        webhook_url = '{0}queues/head/'.format(self.base_url)
 
-        next_track = self.webhook.delete(self.__class__.__name__, webhook_url)
+        next_track = self.webhook.delete(self.__class__.__name__, webhook_url, **kwargs)
         return next_track
 
     def start(self):
@@ -44,16 +42,10 @@ class WebhookSession(object):
 
     def stop(self):
         logger.info('Session ended.')
-        webhook_url = '{0}queues/{1}/head/'.format(
-            self.base_url, self.device['queue']['id'])
-        kwargs = {'state': 'stopped'}
-
-        self.webhook.patch(self.__class__.__name__, webhook_url, **kwargs)
 
     def update_head(self, kwargs):
         logger.info('Updating current head track.')
-        webhook_url = '{0}queues/{1}/head/'.format(
-            self.base_url, self.device['queue']['id'])
+        webhook_url = '{0}queues/head/'.format(self.base_url)
 
         self.webhook.patch(self.__class__.__name__, webhook_url, **kwargs)
 

@@ -76,4 +76,4 @@ class Webhooks(object):
 
     def delete(self, class_name, webhook_url, **kwargs):
         webhook = requests.delete
-        return self._send_request(webhook, class_name, webhook_url)
+        return self._send_request(webhook, class_name, webhook_url, kwargs)
