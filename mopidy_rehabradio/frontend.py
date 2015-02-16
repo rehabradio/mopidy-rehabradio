@@ -10,7 +10,6 @@ from mopidy.core import CoreListener
 
 # local imports
 from playback import WebhookPlayback
-from reporters import EventReporter, StatusReporter
 from session import WebhookSession
 
 
@@ -34,18 +33,11 @@ class WebhookFrontend(pykka.ThreadingActor, CoreListener):
         self.playback = WebhookPlayback.start(
             self.config, self.core, self.session)
 
-        self.event_reporter = EventReporter.start(
-            self.config, self.core, self.session)
-        self.status_reporter = StatusReporter.start(
-            self.config, self.core, self.session)
-
     def on_event(self, event, **kwargs):
         pass
 
     def _stop_children(self):
-        self.event_reporter.stop()
         self.playback.stop()
-        self.status_reporter.stop()
 
     def on_stop(self):
         self.session.stop()
