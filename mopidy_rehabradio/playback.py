@@ -55,6 +55,8 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         self._play_track()
         # Start tracking the song
         self.track_song()
+        # Start update task
+        self.update_status()
 
     def on_stop(self):
         """Update the server to show the track has finished.
