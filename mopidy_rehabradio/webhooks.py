@@ -21,7 +21,7 @@ class Webhooks(object):
             'content-type': 'application/json'
         }
 
-    def _send_request(self, webhook, class_name, webhook_url, data=None):
+    def _send_request(self, webhook, webhook_url, data=None):
         payload = {}
         response_data = {}
 
@@ -30,16 +30,14 @@ class Webhooks(object):
         try:
             response = webhook(webhook_url, headers=self.headers, data=json.dumps(payload))
         except Exception as e:
-            logger.warning('Unable to send {0} Webhook: ({1}) {2}'.format(
-                class_name,
+            logger.warning('Unable to send Webhook: ({0}) {1}'.format(
                 e.__class__.__name__,
                 e.message,
             ))
         else:
             if response.status_code != 200:
                 logger.warning(
-                    '{0} Bad status code returned: ({1}) {2}'.format(
-                        class_name,
+                    'Bad status code returned: ({0}) {1}'.format(
                         response.status_code,
                         webhook_url
                     )
@@ -49,8 +47,7 @@ class Webhooks(object):
                 response_data = response.json()
             except Exception as e:
                 logger.warning(
-                    '{0} Invalid response returned: ({1}) {2}'.format(
-                        class_name,
+                    'Invalid response returned: ({0}) {1}'.format(
                         e.__class__.__name__,
                         e.message,
                     )
@@ -58,22 +55,22 @@ class Webhooks(object):
 
         return response_data
 
-    def get(self, class_name, webhook_url, **kwargs):
+    def get(self, webhook_url, **kwargs):
         webhook = requests.get
-        return self._send_request(webhook, class_name, webhook_url)
+        return self._send_request(webhook, webhook_url)
 
-    def post(self, class_name, webhook_url, **kwargs):
+    def post(self, webhook_url, **kwargs):
         webhook = requests.post
-        return self._send_request(webhook, class_name, webhook_url, kwargs)
+        return self._send_request(webhook, webhook_url, kwargs)
 
-    def put(self, class_name, webhook_url, **kwargs):
+    def put(self, webhook_url, **kwargs):
         webhook = requests.put
-        return self._send_request(webhook, class_name, webhook_url, kwargs)
+        return self._send_request(webhook, webhook_url, kwargs)
 
-    def patch(self, class_name, webhook_url, **kwargs):
+    def patch(self, webhook_url, **kwargs):
         webhook = requests.patch
-        return self._send_request(webhook, class_name, webhook_url, kwargs)
+        return self._send_request(webhook, webhook_url, kwargs)
 
-    def delete(self, class_name, webhook_url, **kwargs):
+    def delete(self, webhook_url, **kwargs):
         webhook = requests.delete
-        return self._send_request(webhook, class_name, webhook_url, kwargs)
+        return self._send_request(webhook, webhook_url, kwargs)
