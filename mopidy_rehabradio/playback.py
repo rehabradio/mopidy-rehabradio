@@ -29,60 +29,109 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         self.core = core
         self.core.tracklist.consume = True
         self.session = session
-        self.track = self.session.fetch_head()
-        self.timer = None
+        self.track = None
+        self.queue = None
+        self.playback_timer = None
+        self.update_timer = None
 
     def on_start(self):
         """Add the track to the tracklist, then play.
-        If the track has a time position, then pause and seek the track to the given time.
+        If the track has a time position, then pause
+        and seek the track to the given time.
         """
-        self.core.tracklist.add(uri=self.track['track']['uri'])
-        self.core.playback.play()
+        self.track = self.session.fetch_head()
+        if self.track['track']:
+            self.queue = self.track['queue']
+            self._start()
+        else:
+            self.playback_timer = threading.Timer(1, self.on_start)
+            self.playback_timer.start()
 
-        if self.track['time_position']:
-            self.core.playback.pause()
-            self._seek_track()
-
+    def _start(self):
+        """Start the loaded track, and start sending updates to the server.
+        """
+        # Start track
+        self._play_track()
         # Start update task
         self.update_status()
 
     def on_stop(self):
-        kwargs = {
-            'queue_id': self.track['queue'],
-            'state': 'stopped',
-        }
-        self.session.update_head(kwargs)
-        # Empty queue
-        self.core.tracklist.clear()
-        # Stop repeating task (status update)
-        if self.timer:
-            self.timer.cancel()
-
-    def update_status(self):
-        if self.core.playback.current_track.get():
+        """Update the server to show the track has finished.
+        Also clears all the tracks from the tracklist
+        and cancels any running threads.
+        """
+        if self.track['track']:
             kwargs = {
-                'queue_id': self.track['queue'],
-                'state': self.core.playback.state.get(),
-                'time_position': self.core.playback.time_position.get(),
+                'queue_id': self.queue,
+                'state': 'stopped',
             }
             self.session.update_head(kwargs)
 
-        time_til_end = self.track['track']['duration_ms'] - self.core.playback.time_position.get()
+        # Empty queue
+        self.core.tracklist.clear()
 
-        # If there is less than 6 seconds left on the track, add the next track
-        if time_til_end < 6000 and self.core.tracklist.length.get() < 2:
-            kwargs = {'queue_id': self.track['queue']}
-            self.track = self.session.pop_head(kwargs)
-            self.core.tracklist.add(uri=self.track['track']['uri'])
+        # Stop repeating tasks (update/playback)
+        if self.update_timer:
+            self.update_timer.cancel()
+        if self.playback_timer:
+            self.playback_timer.cancel()
 
-            # Ensure a track is playing
-            if self.core.playback.state.get() != 'playing':
-                self.core.playback.play()
+    def update_status(self):
+        """Sends constant updates to the server every 3 seconds,
+        and removes the track from the queue, once it has finished.
+        """
+        # Always ensure there is a track to update on.
+        if self.track['track']:
+            if self.core.playback.current_track.get():
+                kwargs = {
+                    'queue_id': self.queue,
+                    'state': self.core.playback.state.get(),
+                    'time_position': self.core.playback.time_position.get(),
+                }
+                self.session.update_head(kwargs)
 
-        self.timer = threading.Timer(3, self.update_status)
-        self.timer.start()
+            # Work out the time remaining on the track
+            t_end = self.track['track']['duration_ms']
+            t_current = self.core.playback.time_position.get()
+            time_til_end = t_end - t_current
 
-    def _seek_track(self):
-        seek_time = self.track['time_position'] + 1500
-        time.sleep(1.5)
-        self.core.playback.seek(seek_time)
+            # If there is less than 6 seconds left on the track,
+            # add the next track to the tracklist
+            if time_til_end < 6000 and self.core.tracklist.length.get() < 2:
+                self._next_track()
+
+        self.update_timer = threading.Timer(3, self.update_status)
+        self.update_timer.start()
+
+    def _next_track(self):
+        """Fetches the next available track from the server,
+        if no track is found, it will keep looping until a track is loaded in
+        """
+        kwargs = {'queue_id': self.queue}
+        self.track = self.session.pop_head(kwargs)
+        if self.track['track']:
+            logger.info('NEXT TRACK STARTED')
+            self.queue = self.track['queue']
+            self._play_track()
+        else:
+            self.playback_timer = threading.Timer(1, self._next_track)
+            self.playback_timer.start()
+
+    def _play_track(self):
+        """Starts the track using its uri parameter.
+        If the track has a time_position property set,
+        then seek the track to that position.
+        """
+        # Add track to tracklist
+        self.core.tracklist.add(uri=self.track['track']['uri'])
+        # Ensure a track is playing
+        if self.core.playback.state.get() != 'playing':
+            self.core.playback.play()
+
+        if self.track['time_position']:
+            self.core.playback.pause()
+            seek_time = self.track['time_position'] + 1500
+            # Delay required to allow mopidy to update,
+            # before re-starting the track.
+            time.sleep(1.5)
+            self.core.playback.seek(seek_time)
