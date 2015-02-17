@@ -102,19 +102,22 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         """Tracks the current playing track, and sends a pop request to the session,
         to remove the current track from the queue and fetch the next track.
         """
+        self.track_timer = threading.Timer(0.5, self.track_song)
+
         if self.track.get('track'):
             # Work out the time remaining on the track
-            t_end = self.track['track']['duration_ms']
+            t_end = int(self.track['track']['duration_ms'])
             t_current = self.core.playback.time_position.get()
             time_til_end = t_end - t_current
 
-            # If there is less than 3 seconds left on the track,
+            # If there is less than 4 seconds left on the track,
             # add the next track to the tracklist
-            if 2000 > time_til_end < 3000:
+            if 3500 > time_til_end < 4000:
                 if self.core.tracklist.length.get() < 2:
                     self._next_track()
 
-        self.track_timer = threading.Timer(1, self.track_song)
+                    self.track_timer = threading.Timer(2, self.track_song)
+
         self.track_timer.start()
 
     def _next_track(self):
@@ -142,7 +145,13 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         if self.core.playback.state.get() != 'playing':
             self.core.playback.play()
 
-        if self.track['time_position']:
+        logger.info('TIME POSITION {}.'.format(self.track['time_position']))
+
+        if self.track['time_position'] > 500:
+
+            if self.track['time_position'] + 1500 >= self.track['track']['duration_ms']:
+                self._next_track()
+
             self.core.playback.pause()
             seek_time = self.track['time_position'] + 1500
             # Delay required to allow mopidy to update,
