@@ -55,8 +55,6 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         self._play_track()
         # Start tracking the song
         self.track_song()
-        # Start update task
-        self.update_status()
 
     def on_stop(self):
         """Update the server to show the track has finished.
@@ -124,6 +122,10 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         """Fetches the next available track from the server,
         if no track is found, it will keep looping until a track is loaded in
         """
+        # Stop the updater
+        if self.update_timer:
+            self.update_timer.cancel()
+
         kwargs = {'queue_id': self.queue}
         self.track = self.session.pop_head(kwargs)
         if self.track.get('track') and self.track['track']:
@@ -158,3 +160,6 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
             # before re-starting the track.
             time.sleep(1.5)
             self.core.playback.seek(seek_time)
+
+        # Start update task
+        self.update_status()
