@@ -18,19 +18,19 @@ class WebhookSession(object):
         self.base_url = config['webhook']['webhook']
 
     def start(self):
-        logger.info('Webhook session started')
+        logger.info('Session started.')
 
     def stop(self):
         logger.info('Session ended.')
 
     def fetch_head(self):
-        logger.info('Fetching head track')
+        logger.info('Fetching head track.')
         webhook_url = '{0}queues/head/'.format(self.base_url)
 
         return self.webhook.get(webhook_url)
 
     def pop_head(self, kwargs):
-        logger.info('Removing current head track')
+        logger.info('Removing current head track.')
         webhook_url = '{0}queues/head/'.format(self.base_url)
 
         return self.webhook.delete(webhook_url, **kwargs)
