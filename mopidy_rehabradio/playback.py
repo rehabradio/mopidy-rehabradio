@@ -134,7 +134,10 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
                 # If there is less than 5 seconds left on the track,
                 # add the next track to the tracklist
                 if time_til_end < 5000:
-                    self._next_track()
+                    # Stop the timers
+                    self.stop_timer = True
+                    # Setup next track
+                    return self._next_track()
 
         self.track_timer = threading.Timer(0.5, self.track_song)
         self.track_timer.start()
@@ -143,17 +146,14 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         """Fetches the next available track from the server,
         if no track is found, it will keep looping until a track is loaded in
         """
-        # Stop the times
-        self.stop_timer = True
-
         kwargs = {'queue_id': self.queue}
         self.track = self.session.pop_head(kwargs)
         if self.track.get('track') and self.track['track']:
             self.queue = self.track['queue']
-            self._play_track()
-        else:
-            self.playback_timer = threading.Timer(1, self._next_track)
-            self.playback_timer.start()
+            return self._play_track()
+
+        self.playback_timer = threading.Timer(1, self._next_track)
+        self.playback_timer.start()
 
     def _play_track(self):
         """Starts the track using its uri parameter.
@@ -169,7 +169,7 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         if self.track['time_position'] and self.track['time_position'] > 500:
 
             if self.track['time_position'] + 1500 >= self.track['track']['duration_ms']:
-                self._next_track()
+                return self._next_track()
 
             self.core.playback.pause()
             seek_time = self.track['time_position'] + 1500
