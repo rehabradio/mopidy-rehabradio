@@ -28,7 +28,7 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
     playback_timer = None
     track_timer = None
     update_timer = None
-    stop_timer = False
+    stop_timer = True
 
     def __init__(self, config, core, session):
         super(WebhookPlayback, self).__init__()
@@ -55,10 +55,6 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         """
         # Start track
         self._play_track()
-        # Start tracking the song
-        self.track_song()
-        # Start update task
-        self.update_status()
 
     def on_stop(self):
         """Update the server to show the track has finished.
@@ -68,6 +64,16 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         # Stop any new timers
         self.stop_timer = True
 
+
+        # Stop repeating tasks (update/playback)
+        if self.update_timer:
+            self.update_timer.cancel()
+        if self.track_timer:
+            self.track_timer.cancel()
+        if self.playback_timer:
+            self.playback_timer.cancel()
+
+        # Update the server to let it know the track has been stopped
         if self.track.get('track') and self.track['track']:
             kwargs = {
                 'queue_id': self.queue,
@@ -78,22 +84,16 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         # Empty queue
         self.core.tracklist.clear()
 
-        # Stop repeating tasks (update/playback)
-        if self.update_timer:
-            self.update_timer.cancel()
-        if self.track_timer:
-            self.track_timer.cancel()
-        if self.playback_timer:
-            self.playback_timer.cancel()
-
     def on_event(self, event):
         if event == 'tracklist_changed':
             if self.core.playback.time_position.get() == 0:
-                self.stop_timer = False
-                # Start tracking the song
-                self.track_song()
-                # Start update task
-                self.update_status()
+                # If timers are stopped, start them up again
+                if self.stop_timer is True:
+                    self.stop_timer = False
+                    # Start update task
+                    self.update_status()
+                    # Start tracking the song
+                    self.track_song()
 
     def update_status(self):
         """Sends constant updates to the server every 3 seconds,
@@ -140,7 +140,7 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
                     # Setup next track
                     return self._next_track()
 
-        self.track_timer = threading.Timer(0.5, self.track_song)
+        self.track_timer = threading.Timer(1, self.track_song)
         self.track_timer.start()
 
     def _next_track(self):
@@ -167,14 +167,9 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         if self.core.playback.state.get() != 'playing':
             self.core.playback.play()
 
-        if self.track['time_position'] and self.track['time_position'] > 500:
-
-            if self.track['time_position'] + 1500 >= self.track['track']['duration_ms']:
+        if self.track['time_position'] and self.track['time_position'] > 1000:
+            if self.track['time_position'] + 1000 >= self.track['track']['duration_ms']:
                 return self._next_track()
-
-            self.core.playback.pause()
-            seek_time = self.track['time_position'] + 1500
-            # Delay required to allow mopidy to update,
-            # before re-starting the track.
-            time.sleep(1.5)
-            self.core.playback.seek(seek_time)
+            # Delay required to allow mopidy to setup track
+            time.sleep(1)
+            self.core.playback.seek(self.track['time_position'])
