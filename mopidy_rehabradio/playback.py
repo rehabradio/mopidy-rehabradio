@@ -39,10 +39,12 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         self.initiate()
 
     def initiate(self):
+        """Loads in the top track of a given queue.
+        Note will loop itself every second until a track is loaded.
+        """
         self.track = self.session.fetch_head()
 
         if self.track.get('track') is None:
-            logger.info('NO NEXT TRACK FOUND :(')
             time.sleep(1)
             return self.initiate()
 
@@ -71,14 +73,15 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
             return self.next()
 
     def play(self):
+        """Starts playing the first track in the tracklist.
+        If the track has a "time_position" value then seek the track to that postion.
+        """
         # Start track
         self.core.playback.play()
 
         # Annoyingly cant start a track at a given time,
         # So once the track has started we can seek it to the correct position
-        logger.info('TIME POSITION {}.'.format(self.track['time_position']))
         if self.track['time_position']:
-            logger.info('SEEKING.')
             self.seek()
 
         self.stop_thread = False
@@ -86,6 +89,9 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         self.track_thread()
 
     def seek(self):
+        """Seeks a track to a given location.
+        Note there is a 1.5 second delay to allow mopidy to settle.
+        """
         seek_time = self.track['time_position'] + 2000
         # If the seeked time is longer than the tracks duration,
         # then start the next track instead
@@ -93,12 +99,13 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
             return self.next()
         # Delay required to allow mopidy to setup track
         time.sleep(1.5)
-        logger.info('SEEK TIME {}.'.format(seek_time))
         self.core.playback.seek(seek_time)
 
     def next(self):
+        """Plays the next track which is stored locally.
+        If no track is found then it loops every second until a track is found.
+        """
         if self.next_track is None:
-            logger.info('NO NEXT TRACK FOUND :(')
             time.sleep(1)
             return self.next()
 
@@ -108,6 +115,9 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         self.play()
 
     def update_thread(self):
+        """Sends updates to the server every 3 seconds
+        on the status of the playing track.
+        """
         # If stop_thread is set, then return causing the loop to break
         if self.stop_thread:
             return
@@ -127,6 +137,8 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         thread_timer.start()
 
     def track_thread(self):
+        """Watches the track to know when to trigger fetching a the next track.
+        """
         # If stop_thread is set, then return causing the loop to break
         if self.stop_thread:
             return
