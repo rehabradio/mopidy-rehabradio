@@ -36,8 +36,17 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         """Grab the current head track, and add it to the tracklist.
         Starts the play method.
         """
+        self.initiate()
+
+    def initiate(self):
         self.track = self.session.fetch_head()
-        self.queue = self.track['queue']
+
+        if self.track.get('track') is None:
+            logger.info('NO NEXT TRACK FOUND :(')
+            time.sleep(1)
+            return self.initiate()
+
+        self.queue = 1
         self.core.tracklist.add(uri=self.track['track']['uri'])
 
         self.play()
@@ -67,7 +76,9 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
 
         # Annoyingly cant start a track at a given time,
         # So once the track has started we can seek it to the correct position
+        logger.info('TIME POSITION {}.'.format(self.track['time_position']))
         if self.track['time_position']:
+            logger.info('SEEKING.')
             self.seek()
 
         self.stop_thread = False
@@ -81,12 +92,14 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         if seek_time >= self.track['track']['duration_ms']:
             return self.next()
         # Delay required to allow mopidy to setup track
-        time.sleep(1)
+        time.sleep(1.5)
+        logger.info('SEEK TIME {}.'.format(seek_time))
         self.core.playback.seek(seek_time)
 
     def next(self):
         if self.next_track is None:
             logger.info('NO NEXT TRACK FOUND :(')
+            time.sleep(1)
             return self.next()
 
         self.track = self.next_track
@@ -99,13 +112,15 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         if self.stop_thread:
             return
 
-        # Send updates to the server
-        kwargs = {
-            'queue_id': self.queue,
-            'state': self.core.playback.state.get(),
-            'time_position': self.core.playback.time_position.get(),
-        }
-        self.session.update_head(kwargs)
+        # Ensure there is a track to report on
+        if self.core.playback.current_track.get():
+            # Send updates to the server
+            kwargs = {
+                'queue_id': self.queue,
+                'state': self.core.playback.state.get(),
+                'time_position': self.core.playback.time_position.get(),
+            }
+            self.session.update_head(kwargs)
 
         # Loop method every 3 seconds
         thread_timer = threading.Timer(3, self.update_thread)
