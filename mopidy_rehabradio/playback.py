@@ -23,7 +23,8 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
     queue = None
     track = None
     next_track = None
-    stop_thread = True
+    stop_update_thread = True
+    stop_track_thread = True
 
     def __init__(self, config, core, session):
         super(WebhookPlayback, self).__init__()
@@ -60,7 +61,8 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         # Stop playback
         self.core.playback.stop()
         # Stop any new timers
-        self.stop_thread = True
+        self.stop_update_thread = True
+        self.stop_track_thread = True
         # Empty queue
         self.core.tracklist.clear()
 
@@ -84,7 +86,8 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         if self.track['time_position']:
             self.seek()
 
-        self.stop_thread = False
+        self.stop_update_thread = False
+        self.stop_track_thread = False
         self.update_thread()
         self.track_thread()
 
@@ -119,7 +122,7 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         on the status of the playing track.
         """
         # If stop_thread is set, then return causing the loop to break
-        if self.stop_thread:
+        if self.stop_update_thread:
             return
 
         # Ensure there is a track to report on
@@ -140,7 +143,7 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         """Watches the track to know when to trigger fetching a the next track.
         """
         # If stop_thread is set, then return causing the loop to break
-        if self.stop_thread:
+        if self.stop_track_thread:
             return
 
         if self.track.get('track'):
@@ -153,11 +156,13 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
                 # If there is less than 5 seconds left on the track,
                 # add the next track to the tracklist
                 if time_til_end < 5000:
+                    # Stop updates
+                    self.stop_update_thread = True
+
                     kwargs = {'queue_id': self.queue}
                     next_track = self.session.pop_head(kwargs)
                     # Don't exit loop until a new track is loaded in.
                     if next_track.get('track'):
-                        self.stop_thread = True
                         self.next_track = next_track
                         self.queue = self.next_track['queue']
                         # Exit loop
