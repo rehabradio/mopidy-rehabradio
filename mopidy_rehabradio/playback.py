@@ -106,13 +106,16 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         # Always ensure there is a track to update on.
         if self.track.get('track') and self.track['track']:
             if self.core.playback.current_track.get():
-                if self.core.playback.time_position.get():
-                    kwargs = {
-                        'queue_id': self.queue,
-                        'state': self.core.playback.state.get(),
-                        'time_position': self.core.playback.time_position.get(),
-                    }
-                    self.session.update_head(kwargs)
+                track_time = self.core.playback.time_position.get()
+                if track_time:
+                    time_position = track_time + 1200
+                    if time_position < self.track['track']['duration_ms']:
+                        kwargs = {
+                            'queue_id': self.queue,
+                            'state': self.core.playback.state.get(),
+                            'time_position': time_position,
+                        }
+                        self.session.update_head(kwargs)
 
         self.update_timer = threading.Timer(3, self.update_status)
         self.update_timer.start()
@@ -163,13 +166,18 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         """
         # Add track to tracklist
         self.core.tracklist.add(uri=self.track['track']['uri'])
-        # Ensure a track is playing
+        # Start the track if not playing
         if self.core.playback.state.get() != 'playing':
             self.core.playback.play()
+            if self.track['time_position'] and self.track['time_position'] > 1000:
+                self._seek_track()
 
-        if self.track['time_position'] and self.track['time_position'] > 1000:
-            if self.track['time_position'] + 1000 >= self.track['track']['duration_ms']:
-                return self._next_track()
-            # Delay required to allow mopidy to setup track
-            time.sleep(1)
-            self.core.playback.seek(self.track['time_position'])
+    def _seek_track(self):
+        seek_time = self.track['time_position'] + 2000
+        # If the seeked time is longer than the tracks duration,
+        # then start the next track instead
+        if seek_time >= self.track['track']['duration_ms']:
+            return self._next_track()
+        # Delay required to allow mopidy to setup track
+        time.sleep(1)
+        self.core.playback.seek(seek_time)
