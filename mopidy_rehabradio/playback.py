@@ -130,6 +130,7 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         if self.core.playback.current_track.get():
             # Send updates to the server
             kwargs = {
+                'track_id': self.track['id'],
                 'queue_id': self.queue,
                 'state': self.core.playback.state.get(),
                 'time_position': self.core.playback.time_position.get(),
@@ -160,8 +161,6 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
                 if time_til_end < 5000 or not self.core.playback.current_track.get():
                     # Stop updates
                     self.stop_update_thread = True
-
-                    logger.info('QUEUE {}.'.format(self.queue))
 
                     # Fetch next track
                     kwargs = {'queue_id': self.queue}
