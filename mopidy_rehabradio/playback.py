@@ -20,6 +20,7 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
     If a timelapse is set, then the track is seeked to the given position.
     """
 
+    popped = None
     queue = None
     track = None
     next_track = None
@@ -166,16 +167,25 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
                     # Stop updates
                     self.stop_update_thread = True
 
-                    # Fetch next track
-                    kwargs = {'queue_id': self.queue}
-                    next_track = self.session.pop_head(kwargs)
+                    # Delete the current track from the server and fetch the next.
+                    # popped param is set to ensure only one delete request is sent.
+                    # Futher requests should be fetches rather than deletes.
+                    if self.popped:
+                        next_track = self.session.fetch_head()
+                    else:
+                        kwargs = {'queue_id': self.queue}
+                        next_track = self.session.pop_head(kwargs)
+                        self.popped = True
 
-                    # Don't exit loop until a new track is loaded in.
+                    # If a track is found, added it
                     if next_track.get('track'):
                         self.next_track = next_track
                         self.queue = self.next_track['queue']
+                        self.popped = False
                         # Exit loop
                         return
+                    else:
+                        self.initiate()
 
         # Loop method every 1/2 second
         thread_timer = threading.Timer(0.5, self.track_thread)
