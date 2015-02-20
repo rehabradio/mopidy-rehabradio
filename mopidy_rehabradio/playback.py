@@ -20,7 +20,7 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
     If a timelapse is set, then the track is seeked to the given position.
     """
 
-    popped = None
+    popped = False
     queue = None
     track = None
     next_track = None
@@ -173,9 +173,9 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
                     if self.popped:
                         next_track = self.session.fetch_head()
                     else:
+                        self.popped = True
                         kwargs = {'queue_id': self.queue}
                         next_track = self.session.pop_head(kwargs)
-                        self.popped = True
 
                     # If a track is found, added it
                     if next_track.get('track'):
@@ -188,5 +188,5 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
                         self.initiate()
 
         # Loop method every 1/2 second
-        thread_timer = threading.Timer(0.5, self.track_thread)
+        thread_timer = threading.Timer(1, self.track_thread)
         thread_timer.start()
