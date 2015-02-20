@@ -113,6 +113,7 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
             return self.next()
 
         self.track = self.next_track
+        self.next_track = None
 
         self.core.tracklist.add(uri=self.track['track']['uri'])
         self.play()
@@ -154,13 +155,18 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
                 time_til_end = t_end - t_current
 
                 # If there is less than 5 seconds left on the track,
-                # add the next track to the tracklist
-                if time_til_end < 5000:
+                # add the next track to the tracklist,
+                # or if no track is currently playing
+                if time_til_end < 5000 or not self.core.playback.current_track.get():
                     # Stop updates
                     self.stop_update_thread = True
 
+                    logger.info('QUEUE {}.'.format(self.queue))
+
+                    # Fetch next track
                     kwargs = {'queue_id': self.queue}
                     next_track = self.session.pop_head(kwargs)
+
                     # Don't exit loop until a new track is loaded in.
                     if next_track.get('track'):
                         self.next_track = next_track
