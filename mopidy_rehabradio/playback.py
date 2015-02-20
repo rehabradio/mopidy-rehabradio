@@ -128,14 +128,18 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
 
         # Ensure there is a track to report on
         if self.core.playback.current_track.get():
-            # Send updates to the server
-            kwargs = {
-                'track_id': self.track['id'],
-                'queue_id': self.queue,
-                'state': self.core.playback.state.get(),
-                'time_position': self.core.playback.time_position.get(),
-            }
-            self.session.update_head(kwargs)
+            # Ensure track has started and that it is also not about to end.
+            time_position = self.core.playback.time_position.get()
+            total = self.track['track']['duration_ms']
+            if 1000 < time_position < (total - 9000):
+                # Send updates to the server
+                kwargs = {
+                    'track_id': self.track['id'],
+                    'queue_id': self.queue,
+                    'state': self.core.playback.state.get(),
+                    'time_position': self.core.playback.time_position.get(),
+                }
+                self.session.update_head(kwargs)
 
         # Loop method every 3 seconds
         thread_timer = threading.Timer(3, self.update_thread)
