@@ -73,6 +73,7 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         state = self.core.playback.state.get()
 
         if event == 'tracklist_changed' and state == 'stopped':
+            self.core.tracklist.clear()
             return self.next()
 
     def play(self):
