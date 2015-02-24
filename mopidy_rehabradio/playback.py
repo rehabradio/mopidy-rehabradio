@@ -38,9 +38,11 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         """Grab the current head track, and add it to the tracklist.
         Starts the play method.
         """
+        logger.info('ON START CALLED')
         self.initiate()
 
     def initiate(self):
+        logger.info('INITITATE CALLED')
         """Loads in the top track of a given queue.
         Note will loop itself every second until a track is loaded.
         """
@@ -73,13 +75,14 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         state = self.core.playback.state.get()
 
         if event == 'tracklist_changed' and state == 'stopped':
-            self.core.tracklist.clear()
+            logger.info('CALLING NEXT')
             return self.next()
 
     def play(self):
         """Starts playing the first track in the tracklist.
         If the track has a "time_position" value then seek the track to that postion.
         """
+        logger.info('PLAY CALLED')
         # Start track
         self.core.playback.play()
 
@@ -94,6 +97,7 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         self.track_thread()
 
     def seek(self):
+        logger.info('SEEK CALLED')
         """Seeks a track to a given location.
         Note there is a 1.5 second delay to allow mopidy to settle.
         """
@@ -107,6 +111,7 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
         self.core.playback.seek(seek_time)
 
     def next(self):
+        logger.info('NEXT CALLED')
         """Plays the next track which is stored locally.
         If no track is found then it loops every second until a track is found.
         """
@@ -171,12 +176,14 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
                     # Delete the current track from the server and fetch the next.
                     # popped param is set to ensure only one delete request is sent.
                     # Futher requests should be fetches rather than deletes.
+                    logger.info('POPPING TRACK')
                     if self.popped:
                         next_track = self.session.fetch_head()
                     else:
                         self.popped = True
                         kwargs = {'queue_id': self.queue}
                         next_track = self.session.pop_head(kwargs)
+                    logger.info('############')
 
                     # If a track is found, added it
                     if next_track.get('track'):
@@ -185,8 +192,6 @@ class WebhookPlayback(pykka.ThreadingActor, CoreListener):
                         self.popped = False
                         # Exit loop
                         return
-                    else:
-                        self.initiate()
 
         # Loop method every 1/2 second
         thread_timer = threading.Timer(1, self.track_thread)
