@@ -37,9 +37,10 @@ class Webhooks(object):
         else:
             if response.status_code != 200:
                 logger.warning(
-                    'Bad status code returned: ({0}) {1}'.format(
+                    'Bad status code returned: ({0}) {1}: {2}'.format(
                         response.status_code,
-                        webhook_url
+                        response.request.method,
+                        webhook_url,
                     )
                 )
 
